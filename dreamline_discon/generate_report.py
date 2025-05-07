@@ -10,7 +10,7 @@ column_widths = [20, 25, 20, 20, 30]
 header_fills = ['#00345B', '#00345B', '#00345B', '#C5D9F1', '#C5D9F1']
 header_texts = ['#FFFFFF', '#FFFFFF', '#FFFFFF', '#00008B', '#00008B']
 
-csv_input_path = "C:/Users/panderson/OneDrive - American Bath Group/Documents/Paul_Anderson/Python Scripts/dreamline_discon/CSV.DTP0799-Example.csv"
+csv_input_path = "C:/Users/panderson/OneDrive - American Bath Group/Documents/Reports/CSV.DTP0799-Example.csv"
 
 # === Generate filename with date (and save to OneDrive folder) ===
 today_str = datetime.today().strftime("%Y-%m-%d")

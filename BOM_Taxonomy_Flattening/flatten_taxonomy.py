@@ -61,7 +61,7 @@ def flatten_taxonomy(product_box_file, box_part_file, output_file):
 
 # --- Change these to your actual file paths ---
 flatten_taxonomy(
-    "C:/Users/panderson/OneDrive - American Bath Group/Documents/Paul_Anderson/Python Scripts/BOM_Taxonomy_Flattening/product-box.xlsx",
-    "C:/Users/panderson/OneDrive - American Bath Group/Documents/Paul_Anderson/Python Scripts/BOM_Taxonomy_Flattening/box-part.xlsx",
-    "C:/Users/panderson/OneDrive - American Bath Group/Documents/Paul_Anderson/Python Scripts/BOM_Taxonomy_Flattening/output.xlsx"
+    "C:/Users/panderson/OneDrive - American Bath Group/Documents/Reports/product-box.xlsx",
+    "C:/Users/panderson/OneDrive - American Bath Group/Documents/Reports/box-part.xlsx",
+    "C:/Users/panderson/OneDrive - American Bath Group/Documents/Reports/output.xlsx"
 )
