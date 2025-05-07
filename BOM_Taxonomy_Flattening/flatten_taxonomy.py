@@ -1,9 +1,10 @@
 import pandas as pd
 
 def flatten_taxonomy(product_box_file, box_part_file, output_file):
-    # Step 1: Load Excel sheets
-    df_prod = pd.read_excel(product_box_file, header=None, usecols="A:J", dtype=str)
-    df_box = pd.read_excel(box_part_file, header=None, usecols="A:AA", dtype=str)
+    # Step 1: Load Excel sheets, skipping the header row
+    df_prod = pd.read_excel(product_box_file, header=None, skiprows=1, usecols="A:J", dtype=str)
+    df_box = pd.read_excel(box_part_file, header=None, skiprows=1, dtype=str)  # ← updated line
+
 
     # Step 2: Build Box → Parts mapping
     box_to_parts = {}
@@ -23,7 +24,7 @@ def flatten_taxonomy(product_box_file, box_part_file, output_file):
         boxes = [str(cell).strip() for cell in row[1:] if pd.notna(cell) and str(cell).strip()]
         product_to_boxes[product_id] = boxes
 
-    # Step 4: Determine maximum number of Boxes and Parts (used for alignment and headers)
+    # Step 4: Determine maximum number of Boxes and Parts
     max_boxes = max((len(b) for b in product_to_boxes.values()), default=0)
     max_parts = max((len(p) for p in box_to_parts.values()), default=0)
 
@@ -32,13 +33,11 @@ def flatten_taxonomy(product_box_file, box_part_file, output_file):
 
     for product_id in product_to_boxes:
         boxes = product_to_boxes[product_id]
-        # Product row: Boxes start in column 3
         row = [product_id, "Product"] + boxes
         output_rows.append(row)
 
         for box_id in boxes:
             parts = box_to_parts.get(box_id, [])
-            # Box row: pad with `max_boxes` empty cells so parts start at correct column
             row = [box_id, "Box"] + [''] * max_boxes + parts
             output_rows.append(row)
 
@@ -60,12 +59,9 @@ def flatten_taxonomy(product_box_file, box_part_file, output_file):
     df_out.to_excel(output_file, index=False)
     print(f"✅ Finished. {len(df_out)} rows written to {output_file}")
 
-
-
-
 # --- Change these to your actual file paths ---
 flatten_taxonomy(
-    "C:/Users/panderson/OneDrive - American Bath Group/Documents/Paul_Anderson/Python Scripts/BOM_Taxonomy_Flattening/product_to_boxes.xlsx",    # path to your Product → Boxes file
-    "C:/Users/panderson/OneDrive - American Bath Group/Documents/Paul_Anderson/Python Scripts/BOM_Taxonomy_Flattening/box_to_parts.xlsx",        # path to your Box → Parts file
-    "C:/Users/panderson/OneDrive - American Bath Group/Documents/Paul_Anderson/Python Scripts/BOM_Taxonomy_Flattening/test_output.xlsx"     # output file path
+    "C:/Users/panderson/OneDrive - American Bath Group/Documents/Paul_Anderson/Python Scripts/BOM_Taxonomy_Flattening/product-box.xlsx",
+    "C:/Users/panderson/OneDrive - American Bath Group/Documents/Paul_Anderson/Python Scripts/BOM_Taxonomy_Flattening/box-part.xlsx",
+    "C:/Users/panderson/OneDrive - American Bath Group/Documents/Paul_Anderson/Python Scripts/BOM_Taxonomy_Flattening/output.xlsx"
 )
