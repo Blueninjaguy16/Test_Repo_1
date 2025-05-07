@@ -22,6 +22,8 @@ project_id_col_id = column_map.get("Project ID")
 date_requested_col_id = column_map.get("Date Requested")
 status_col_id = column_map.get("Status")
 request_description_col_id = column_map.get("Request Description")
+completion_date_col_id = column_map.get("Completion Date")
+request_type_col_id = column_map.get("Request Type")
 
 # --- BUILD ROW DATA WITH COMMENTS ---
 output_rows = []
@@ -40,9 +42,17 @@ for row in sheet.rows:
         date_requested = ''
     status = get_cell_value(status_col_id)
     request_description = get_cell_value(request_description_col_id)
+    if len(row.cells) > 26:
+        cell = row.cells[26]
+        completion_date = cell.display_value or cell.value or ''
+        if isinstance(completion_date, (datetime, )):
+            completion_date = completion_date.strftime('%Y-%m-%d')
+    else:
+        completion_date = ''
+    request_type = get_cell_value(request_type_col_id)
 
-    if status in ("Complete","Cancelled","submission error","Submissions Error - Channel","Submission Error"):
-        continue  # Skip rows with status "Complete" or "Cancelled"
+#    if status in ("Complete","Cancelled","submission error","Submissions Error - Channel","Submission Error"):
+#        continue  # Skip rows with status "Complete" or "Cancelled"
 
     # Inside the for row in sheet.rows loop:
     print(f"Row {row.id} — Project ID: {project_id}")
@@ -82,6 +92,8 @@ for row in sheet.rows:
         project_id,
         date_requested,
         status,
+        completion_date,
+        request_type,
         request_description,
         latest_comment,
         latest_author,
@@ -95,6 +107,8 @@ with open(OUTPUT_CSV, mode='w', newline='', encoding='utf-8') as f:
         'Project ID',
         'Date Requested',
         'Status',
+        'Completion Date',
+        'Request Type',
         'Request Description',
         'Most Recent Comment',
         'Comment Author',
