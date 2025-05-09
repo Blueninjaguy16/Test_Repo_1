@@ -1,33 +1,32 @@
 import os
+import csv
 from dotenv import load_dotenv
 import smartsheet
 
-# Load environment variables from .env file
+# === LOAD API TOKEN FROM .env ===
 load_dotenv()
-ACCESS_TOKEN = os.getenv('SMARTSHEET_API_TOKEN')
-# Initialize client
+ACCESS_TOKEN = os.getenv("SMARTSHEET_API_TOKEN")
+
+# === SETUP ===
+SHEET_ID = 3657436246265732
+OUTPUT_CSV = "visible_column_headers.csv"
+
+# === INITIALIZE CLIENT ===
 smartsheet_client = smartsheet.Smartsheet(ACCESS_TOKEN)
 smartsheet_client.errors_as_exceptions(True)
 
-# Get the sheet
-sheet_id = 1473435297337220  # Replace with your actual sheet ID
+try:
+    # Fetch sheet
+    sheet = smartsheet_client.Sheets.get_sheet(SHEET_ID)
 
-sheet = smartsheet_client.Sheets.get_sheet(sheet_id)
+    # Get only visible (non-hidden) column titles
+    visible_headers = [col.title for col in sheet.columns if not col.hidden]
 
-# Find the column ID for "Project ID"
-project_id_column = next(
-    (col for col in sheet.columns if col.title == "Project ID"),
-    None
-)
+    # Write to CSV
+    with open(OUTPUT_CSV, mode='w', newline='', encoding='utf-8') as file:
+        csv.writer(file).writerow(visible_headers)
 
-if project_id_column is None:
-    raise ValueError("Column 'Project ID' not found in sheet.")
+    print(f"✅ Visible column headers exported to: {OUTPUT_CSV}")
 
-project_col_id = project_id_column.id
-bottom_rows = sheet.rows[-10:]  # Get the last 10 rows of the sheet
-
-# Extract only "Project ID" values
-for row in bottom_rows:
-    for cell in row.cells:
-        if cell.column_id == project_col_id:
-            print(cell.value)
+except smartsheet.exceptions.ApiError as e:
+    print(f"❌ Smartsheet API Error: {e.error.result_code} - {e.error.message}")
