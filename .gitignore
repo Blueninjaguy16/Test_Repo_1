@@ -1,0 +1,12 @@
+# Ignore environment folders in specific project directories
+Python Scripts/.venv/
+
+hd_emails/.env
+hd_emails/.venv/
+hd_emails/msal_token_cache.jason
+
+smartsheets/.env
+smartsheets/.venv/
+
+test_proj/.venv/
+
