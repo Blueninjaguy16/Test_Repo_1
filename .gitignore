@@ -1,5 +1,5 @@
 # Ignore environment folders in specific project directories
-Python Scripts/.venv/
+.venv/
 
 hd_emails/.env
 hd_emails/.venv/
