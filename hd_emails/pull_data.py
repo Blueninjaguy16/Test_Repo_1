@@ -36,6 +36,8 @@ for row in sheet.rows:
             matching_rows.append(row)
             break
 
+print(f"✅ Found {len(matching_rows)} rows for 'Home Depot'")
+
 # === MAP COLUMN IDS TO TITLES ===
 column_id_map = {col.id: col.title for col in sheet.columns}
 
@@ -49,6 +51,7 @@ for row in matching_rows:
     # === FILTER BY STATUS ===
     status = str(row_dict.get("Status") or "").strip().lower()
     if status in ["complete", "cancelled", "submission error"]:
+        print(f"⏭️ Row {row.id} skipped — status: {status}")
         continue
 
     # === FILTER BY DATE REQUESTED ===
@@ -69,19 +72,68 @@ for row in matching_rows:
         elif hasattr(date_requested, 'isoformat'):
             request_date = datetime.combine(date_requested, datetime.min.time())
         else:
+            print(f"⏭️ Row {row.id} skipped — unknown date format: {date_requested}")
             continue
 
-        if request_date > cutoff_date:
-            continue  # skip if too recent
-    except Exception:
-        continue  # skip invalid date formats
+    except Exception as e:
+        print(f"⏭️ Row {row.id} skipped — date parsing error: {e}")
+        continue
 
+    # === FETCH ALL COMMENTS WITH AUTHOR ===
+    all_comments = []
+    latest_timestamp_raw = None
+    latest_author = ""
+
+    try:
+        discussions = smartsheet_client.Discussions.get_row_discussions(
+            sheet_id=SHEET_ID,
+            row_id=row.id,
+            include="comments"
+        ).data
+
+        for discussion in discussions:
+            for comment in discussion.comments:
+                author = comment.created_by.name if comment.created_by else "Unknown"
+                comment_time = comment.created_at
+                comment_text = comment.text.strip().replace('\n', ' ')
+
+                # Track latest timestamp
+                if not latest_timestamp_raw or comment_time > latest_timestamp_raw:
+                    latest_timestamp_raw = comment_time
+                    latest_author = author
+
+                all_comments.append(f"{author} [{comment_time.strftime('%Y-%m-%d %H:%M:%S')}]: {comment_text}")
+
+
+        if not latest_timestamp_raw:
+            print(f"⏭️ Row {row.id} skipped — no comments found")
+            continue
+
+        latest_timestamp = latest_timestamp_raw.strftime('%Y-%m-%d %H:%M:%S')
+        all_comments_str = "; ".join(all_comments)
+
+    except Exception as e:
+        print(f"⏭️ Row {row.id} skipped — error fetching comments: {e}")
+        continue
+
+
+
+    row_dict["All Comments"] = all_comments_str
+    row_dict["Comment Author"] = latest_author
+    row_dict["Comment Date"] = latest_timestamp
+
+
+    print(f"✅ Row {row.id} added — comment date: {latest_timestamp}")
     data.append(row_dict)
 
 # === EXPORT TO EXCEL ===
 df = pd.DataFrame(data)
 today_str = datetime.now().strftime("%Y-%m-%d")
-filename = f"HD_Update_Needed_{today_str}.xlsx"
+filename = f"TEST_{today_str}.xlsx"
 output_path = os.path.join(EXPORT_FOLDER, filename)
+
+if not data:
+    print("\n⚠️ No rows passed all filters — Excel file will be empty.")
+
 df.to_excel(output_path, index=False)
 print(f"\n✅ Excel file saved: {output_path}")

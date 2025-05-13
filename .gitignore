@@ -10,3 +10,5 @@ smartsheets/.venv/
 
 test_proj/.venv/
 
+can_report/.venv/
+can_report/.env
