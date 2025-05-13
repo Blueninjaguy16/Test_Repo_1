@@ -3,7 +3,7 @@ Python Scripts/.venv/
 
 hd_emails/.env
 hd_emails/.venv/
-hd_emails/msal_token_cache.jason
+hd_emails/msal_token_cache.json
 
 smartsheets/.env
 smartsheets/.venv/
